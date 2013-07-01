@@ -9,9 +9,16 @@
 
 @protocol v002PacketCaptureProtocol
 
-- (out bycopy NSArray*) packetArray;
 - (oneway void) setInterface:(in oneway NSString*) device;
+
+// Buffer of Packets
 - (oneway void) addPacket:(in oneway NSDictionary*) packet;
+- (out bycopy NSArray*) packetArray;
+
+// Array of Unique IPs
+- (out bycopy NSArray*) ipArray;
+//- (oneway void) addIP:(in oneway NSString*) ip;
+
 - (oneway void) quitHelperTool;
 - (oneway void) debug;
 

@@ -11,32 +11,52 @@
 
 #import "v002PacketCapturePlugIn.h"
 
+
+// OS X Security framework - do things the right way
+#import <SecurityFoundation/SFAuthorization.h>
+#import <SystemConfiguration/SystemConfiguration.h>
+
+// for libpcap
+// see http://www.tcpdump.org/pcap.htm
+// and http://yuba.stanford.edu/~casado/pcap/section1.html
+
+#import <stdio.h>
+#import <stdlib.h>
+#import <pcap.h>
+#import <errno.h>
+#import <sys/socket.h>
+#import <netinet/in.h>
+#import <arpa/inet.h>
+#import <netinet/if_ether.h>
+
+#import "v002PacketCaptureProtocol.h"
+#import "DistributedPacket.h"
+
 #define	kQCPlugIn_Name				@"v002 Packet Capture"
 #define	kQCPlugIn_Description		@"v002 Packet Capture grabs IP data, source, destination, hostname info and outputs as a structure of strings"
 
+@interface v002PacketCapturePlugIn ()
+
+@property (atomic, readwrite, retain) id proxyObjectFromHelper;				// our packet info from helper tool
+@property (atomic, readwrite, assign) AuthorizationRef myAuthorizationRef;	//	for authorizing packet capturing.
+@property (atomic, readwrite, assign) AuthorizationItem* authItems;			//	requested rights. need admin/root for raw socket/promiscuous mode. sounds sexy right?
+
+@end
+
 @implementation v002PacketCapturePlugIn
 
-/*
-Here you need to declare the input / output properties as dynamic as Quartz Composer will handle their implementation
-@dynamic inputFoo, outputBar;
-*/
-
-@dynamic inputInterfaceIndex, outputPacketInfo;
+@dynamic inputInterfaceIndex;
+@dynamic outputPacketInfo;
+@dynamic outputIPList;
 
 + (NSDictionary*) attributes
 {
-	/*
-	Return a dictionary of attributes describing the plug-in (QCPlugInAttributeNameKey, QCPlugInAttributeDescriptionKey...).
-	*/
 	
 	return [NSDictionary dictionaryWithObjectsAndKeys:kQCPlugIn_Name, QCPlugInAttributeNameKey, kQCPlugIn_Description, QCPlugInAttributeDescriptionKey, nil];
 }
 
 + (NSDictionary*) attributesForPropertyPortWithKey:(NSString*)key
 {
-	/*
-	Specify the optional attributes for property based ports (QCPortAttributeNameKey, QCPortAttributeDefaultValueKey...).
-	*/	
 	NSMutableArray * deviceNames = [NSMutableArray new];
 		
 	NSArray* devices  = (NSArray*) SCNetworkInterfaceCopyAll();
@@ -46,94 +66,57 @@ Here you need to declare the input / output properties as dynamic as Quartz Comp
 		[deviceNames addObject:(NSString*)SCNetworkInterfaceGetBSDName((SCNetworkInterfaceRef)intefrace)]; 
 	}
 	
+	[devices release];
+	[deviceNames autorelease];
+	
 	if([key isEqualToString:@"inputInterfaceIndex"])
 	{
 		return [NSDictionary dictionaryWithObjectsAndKeys:@"Interface Device", QCPortAttributeNameKey,
 				[NSNumber numberWithUnsignedInt:0], QCPortAttributeDefaultValueKey,
 				[NSNumber numberWithUnsignedInt:[deviceNames count] - 1], QCPortAttributeMaximumValueKey,
-				[[deviceNames retain] autorelease], QCPortAttributeMenuItemsKey,
+				deviceNames, QCPortAttributeMenuItemsKey,
 				nil];
 	}
-	
+		
 	if([key isEqualToString:@"outputPacketInfo"])
 	{
 		return [NSDictionary dictionaryWithObjectsAndKeys:@"Captured Packet Info", QCPortAttributeNameKey, nil];
-            
 	}
+	
+	if([key isEqualToString:@"outputIPList"])
+		return @{QCPortAttributeNameKey: @"IP List"};
 	
 	return nil;
 }
 
 + (QCPlugInExecutionMode) executionMode
 {
-	/*
-	Return the execution mode of the plug-in: kQCPlugInExecutionModeProvider, kQCPlugInExecutionModeProcessor, or kQCPlugInExecutionModeConsumer.
-	*/
-	
-	return kQCPlugInExecutionModeProcessor;
+	return kQCPlugInExecutionModeProvider;
 }
 
 + (QCPlugInTimeMode) timeMode
 {
-	/*
-	Return the time dependency mode of the plug-in: kQCPlugInTimeModeNone, kQCPlugInTimeModeIdle or kQCPlugInTimeModeTimeBase.
-	*/
-	
-	return kQCPlugInTimeModeNone;
+	return kQCPlugInTimeModeIdle;
 }
 
 - (id) init
 {
 	if(self = [super init])
 	{
-		/*
-		Allocate any permanent resource required by the plug-in.
-		*/
-	
-		SFAuthorization *auth = [SFAuthorization authorization];
-		if (![auth permitWithRight:"info.v002.v002PacketCapture.init" flags:kAuthorizationFlagDefaults|kAuthorizationFlagInteractionAllowed|kAuthorizationFlagExtendRights|kAuthorizationFlagPreAuthorize])    // 2
-		//if (![auth permitWithRight:"info.v002.v002PacketCapture2.init" flags:kAuthorizationFlagDefaults|kAuthorizationFlagInteractionAllowed|kAuthorizationFlagExtendRights])    // 2
-		{
-			myAuthorizationRef = [auth authorizationRef];                        // 3
-			AuthorizationExternalForm authExtForm;
-			OSStatus status = AuthorizationMakeExternalForm(myAuthorizationRef, &authExtForm);    // 4
-			if (errAuthorizationSuccess == status)
-			{
-				NSLog(@"SUCESS - we authorized some shit to do..");
-				if([self testPcap])
-					NSLog(@"Was able to test pcap!!!");
-				else
-					NSLog(@"failed testing pcap:(");
-						  
-			}
-			else
-				NSLog(@"Denied!");
-		}
-	
 	}
-	
 	
 	return self;
 }
 
 - (void) finalize
 {
-	/*
-	Release any non garbage collected resources created in -init.
-	*/
-	
 	[super finalize];
 }
 
 - (void) dealloc
 {
-	/*
-	Release any resources created in -init.
-	*/
-	
 	[super dealloc];
 }
-
 
 - (BOOL) testPcap
 {
@@ -148,7 +131,7 @@ Here you need to declare the input / output properties as dynamic as Quartz Comp
 //	strcmp(path, [pathToHelperTool lossyCString]);
 	
 	// this needs to be looked at
- 	myStatus = AuthorizationExecuteWithPrivileges (myAuthorizationRef,"/Users/vade/Library/Graphics/Quartz Composer Plug-Ins/v002PacketCapture.plugin/Contents/Resources/v002PacketCaptureHelperTool", kAuthorizationFlagDefaults, myArguments, &myCommunicationsPipe);
+ 	OSStatus myStatus = AuthorizationExecuteWithPrivileges (self.myAuthorizationRef,"/Users/vade/Library/Graphics/Quartz Composer Plug-Ins/v002PacketCapture.plugin/Contents/Resources/v002PacketCaptureHelperTool", kAuthorizationFlagDefaults, myArguments, &myCommunicationsPipe);
 	if (myStatus == errAuthorizationSuccess)	
 	{
 		NSLog(@"Launched helper tool - connecting to Shared Port for IPC");
@@ -156,7 +139,7 @@ Here you need to declare the input / output properties as dynamic as Quartz Comp
 		return YES;
 	}
 	else
-		NSLog(@"Error: %ld", myStatus);
+		NSLog(@"Error: %i", myStatus);
 
 	return NO;
 }
@@ -168,51 +151,70 @@ Here you need to declare the input / output properties as dynamic as Quartz Comp
 
 - (BOOL) startExecution:(id<QCPlugInContext>)context
 {
-	/*
-	Called by Quartz Composer when rendering of the composition starts: perform any required setup for the plug-in.
-	Return NO in case of fatal failure (this will prevent rendering of the composition to start).
-	*/
+	NSError* error;
+	//		SFAuthorization *auth = [SFAuthorization authorizationWithFlags:kAuthorizationFlagInteractionAllowed|kAuthorizationFlagExtendRights|kAuthorizationFlagPreAuthorize
+	//																 rights:NULL
+	//															environment:kAuthorizationEmptyEnvironment];
+	
+	SFAuthorization *auth = [SFAuthorization authorization];
+	
+	if(![auth obtainWithRight:"info.v002.v002PacketCapture.init"
+						flags:kAuthorizationFlagDefaults|kAuthorizationFlagExtendRights//|kAuthorizationFlagInteractionAllowed//|kAuthorizationFlagPreAuthorize
+						error:&error])
+	{
+		self.myAuthorizationRef = [auth authorizationRef];                        // 3
+		AuthorizationExternalForm authExtForm;
+		OSStatus status = AuthorizationMakeExternalForm(self.myAuthorizationRef, &authExtForm);    // 4
+		if (errAuthorizationSuccess == status)
+		{
+			NSLog(@"SUCESS - we authorized some shit to do..");
+			if([self testPcap])
+				NSLog(@"Was able to test pcap!!!");
+			else
+				NSLog(@"failed testing pcap:(");
+			
+		}
+		else
+			NSLog(@"Denied!");
+	}
+	else
+		NSLog(@"Not a fucking chance: %@", error);
+		
 	return YES;
 }
 
 - (void) enableExecution:(id<QCPlugInContext>)context
 {	
-	NSConnection* theConnection = [NSConnection connectionWithRegisteredName:@"info.vade.packetCaptureHelperTool" host:nil];
-	
-	proxyObjectFromHelper = [[theConnection rootProxy] retain];
-	
-	NSLog(@"Proxy description %@", proxyObjectFromHelper);
-	
-	[proxyObjectFromHelper setProtocolForProxy:@protocol(v002PacketCaptureProtocol)];
-		
+			
 }
 
 - (BOOL) execute:(id<QCPlugInContext>)context atTime:(NSTimeInterval)time withArguments:(NSDictionary*)arguments
-{	
-
-	//[proxyObjectFromHelper debug];
-	
-	@synchronized(proxyObjectFromHelper)
+{
+	if(!self.proxyObjectFromHelper)
 	{
-		self.outputPacketInfo = [proxyObjectFromHelper packetArray]; //[NSArray arrayWithObjects:testPacket1, testPacket2, testPacket3, nil];
+		NSConnection* theConnection = [NSConnection connectionWithRegisteredName:@"info.vade.packetCaptureHelperTool" host:nil];
+		
+		self.proxyObjectFromHelper = [[theConnection rootProxy] retain];
+		
+		NSLog(@"Proxy description %@", self.proxyObjectFromHelper);
+		
+		[self.proxyObjectFromHelper setProtocolForProxy:@protocol(v002PacketCaptureProtocol)];
+	
 	}
+	
+	self.outputPacketInfo = [self.proxyObjectFromHelper packetArray];
+	self.outputIPList = [self.proxyObjectFromHelper ipArray];
+	
 	return YES;
 }
 
 - (void) disableExecution:(id<QCPlugInContext>)context
 {
-	/*
-	Called by Quartz Composer when the plug-in instance stops being used by Quartz Composer.
-	*/
 }
 
 - (void) stopExecution:(id<QCPlugInContext>)context
 {
-	[proxyObjectFromHelper quitHelperTool];
-	
-	/*
-	Called by Quartz Composer when rendering of the composition stops: perform any required cleanup for the plug-in.
-	*/
+	[self.proxyObjectFromHelper quitHelperTool];
 }
 
 @end

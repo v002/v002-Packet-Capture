@@ -52,16 +52,14 @@ NSMutableDictionary* helperHandleEthernet(u_char *args,const struct pcap_pkthdr*
 {	
 	struct ether_header *eptr;  // net/ethernet.h
 	
-	NSMutableDictionary * returnDictionary = [NSMutableDictionary new];
-	
     // lets start with the ether header..
     eptr = (struct ether_header *) packet;
 	
 	switch (ntohs(eptr->ether_type)) 
 	{
 		case ETHERTYPE_IP:
-		//	NSLog(@"Found IP Packet");
-			returnDictionary = helperHandleIP(args, pkthdr, packet);
+//			NSLog(@"Found IP Packet");
+			return helperHandleIP(args, pkthdr, packet);
 			break;
 		case ETHERTYPE_ARP:
 		//	NSLog(@"Found ARP Packet");
@@ -73,90 +71,101 @@ NSMutableDictionary* helperHandleEthernet(u_char *args,const struct pcap_pkthdr*
 			break;
 	}
 
-    return returnDictionary;
+    return nil;
 }
 
 NSMutableDictionary* helperHandleIP (u_char *args,const struct pcap_pkthdr* pkthdr, const u_char* packet)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	NSMutableDictionary * packetInfoDictionary = [NSMutableDictionary dictionary];
-	
-    int len;	
-    const struct my_ip* ip;
-    u_int length = pkthdr ->len; // - &len;
-    u_int hlen,off,version;
-  
-	//int i;
-	
-    // jump pass the ethernet header
-    ip = (struct my_ip*)(packet + sizeof(struct ether_header));
-    length -= sizeof(struct ether_header); 
-	
-    // check to see we have a packet of valid length
-    if (length < sizeof(struct my_ip))
-    {
-        printf("truncated ip %d",length);
-        return nil;
-    }
-	
-    len     = ntohs(ip->ip_len);
-    hlen    = IP_HL(ip);	// header length 
-    version = IP_V(ip);		// ip version
-	
-    // check version
-    if(version != 4)
-    {
-	//	fprintf(stdout,"Unknown version %d\n",version);
-		return nil;
-    }
-	
-    // check header length
-    if(hlen < 5 )
-    {
-    //    fprintf(stdout,"bad-hlen %d \n",hlen);
-    }
-	
-    // see if we have as much packet as we should
-    if(length < len)
+	@autoreleasepool
 	{
-    //    printf("\ntruncated IP - %d bytes missing\n",len - length);
+		NSMutableDictionary * packetInfoDictionary = [NSMutableDictionary new];
+	
+		int len;	
+		const struct my_ip* ip;
+		u_int length = pkthdr ->len; // - &len;
+		u_int hlen,off,version;
+	  
+		//int i;
+		
+		// jump pass the ethernet header
+		ip = (struct my_ip*)(packet + sizeof(struct ether_header));
+		length -= sizeof(struct ether_header); 
+		
+		// check to see we have a packet of valid length
+		if (length < sizeof(struct my_ip))
+		{
+			[packetInfoDictionary release];
+			printf("truncated ip %d",length);
+			return nil;
+		}
+		
+		len     = ntohs(ip->ip_len);
+		hlen    = IP_HL(ip);	// header length 
+		version = IP_V(ip);		// ip version
+		
+		// check version
+		if(version != 4)
+		{
+		//	fprintf(stdout,"Unknown version %d\n",version);
+			[packetInfoDictionary release];
+			return nil;
+		}
+		
+		// check header length
+		if(hlen < 5 )
+		{
+		//    fprintf(stdout,"bad-hlen %d \n",hlen);
+		}
+		
+		// see if we have as much packet as we should
+		if(length < len)
+		{
+		//    printf("\ntruncated IP - %d bytes missing\n",len - length);
+		}
+		
+		// Check to see if we have the first fragment
+		off = ntohs(ip->ip_off);
+		if((off & 0x1fff) == 0 )	// aka no 1's in first 13 bits
+		{
+	//		struct timeval tv;
+	//		tv = pkthdr->ts;
+	//		
+	//		NSTimeInterval time;
+	//		
+	//		time = (NSTimeInterval)tv.tv_sec;
+	//		
+	//		NSDate* date = [NSDate dateWithTimeIntervalSinceNow:time];
+	//		
+	//		[packetInfoDictionary setValue:[date description] forKey:@"TimeStamp"];
+			NSString* source = [NSString stringWithCString:inet_ntoa(ip->ip_src) encoding:NSASCIIStringEncoding];
+			NSString* destination = [NSString stringWithCString:inet_ntoa(ip->ip_dst) encoding:NSASCIIStringEncoding];
+			
+			NSData* packetData = [NSData dataWithBytes:packet length:pkthdr->caplen];
+			NSString* dataString = [[NSString alloc] initWithData:packetData encoding:NSASCIIStringEncoding];
+
+			[packetInfoDictionary setValue:source forKey:@"Source" ];
+			[packetInfoDictionary setValue:destination forKey:@"Destination"];
+			[packetInfoDictionary setValue:@"IP" forKey:@"Protocol"];
+			[packetInfoDictionary setValue:dataString forKey:@"Data"];
+
+			[dataString release];
+
+//			NSLog(@"Source: %@, Destination: %@", source, destination);
+			
+			
+		//	NSLog(@"%@", packetData);
+			
+			
+			
+			//print SOURCE DESTINATION hlen version len offset
+		   // fprintf(stdout,"IP: ");
+		   // fprintf(stdout,"%s ",
+		   //         inet_ntoa(ip->ip_src));
+		   // fprintf(stdout,"%s %d %d %d %d\n",
+			 //       inet_ntoa(ip->ip_dst),
+			   //     hlen,version,len,off);
+		}
+			
+		return packetInfoDictionary;
 	}
-	
-    // Check to see if we have the first fragment
-    off = ntohs(ip->ip_off);
-    if((off & 0x1fff) == 0 )	// aka no 1's in first 13 bits
-    {
-//		struct timeval tv;
-//		tv = pkthdr->ts;
-//		
-//		NSTimeInterval time;
-//		
-//		time = (NSTimeInterval)tv.tv_sec;
-//		
-//		NSDate* date = [NSDate dateWithTimeIntervalSinceNow:time];
-//		
-//		[packetInfoDictionary setValue:[date description] forKey:@"TimeStamp"];
-	
-		[packetInfoDictionary setValue:[NSString stringWithCString:inet_ntoa(ip->ip_src)] forKey:@"Source"];
-		[packetInfoDictionary setValue:[NSString stringWithCString:inet_ntoa(ip->ip_dst)] forKey:@"Destination"];
-		[packetInfoDictionary setValue:@"IP" forKey:@"Protocol"];
-		
-		
-	//	NSData* packetData = [NSData dataWithBytes:packet length:pkthdr->caplen];
-	//	NSLog(@"%@", packetData);
-		
-	//	[packetInfoDictionary setValue:[NSString stringWithCString:[packetData bytes] length:[packetData length]] forKey:@"Data"];
-		//print SOURCE DESTINATION hlen version len offset
-       // fprintf(stdout,"IP: ");
-       // fprintf(stdout,"%s ",
-       //         inet_ntoa(ip->ip_src));
-       // fprintf(stdout,"%s %d %d %d %d\n",
-         //       inet_ntoa(ip->ip_dst),
-           //     hlen,version,len,off);
-    }
-	
-	[pool release];
-	
-    return [packetInfoDictionary autorelease];
 }

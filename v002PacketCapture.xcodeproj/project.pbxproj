@@ -3,34 +3,23 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
-
-/* Begin PBXAggregateTarget section */
-		233E2C640A83C768005A62DF /* Build & Copy */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 233E2D890A83C7AC005A62DF /* Build configuration list for PBXAggregateTarget "Build & Copy" */;
-			buildPhases = (
-				233E2C690A83C783005A62DF /* ShellScript */,
-			);
-			dependencies = (
-				233E2C660A83C76D005A62DF /* PBXTargetDependency */,
-			);
-			name = "Build & Copy";
-			productName = "Build & Install";
-		};
-/* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
 		16BA95420A7EB2EB001E4983 /* v002PacketCapturePlugIn.m in Sources */ = {isa = PBXBuildFile; fileRef = 16BA95410A7EB2EB001E4983 /* v002PacketCapturePlugIn.m */; };
 		16BA96310A7EB9AC001E4983 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16BA96300A7EB9AC001E4983 /* Quartz.framework */; };
 		1B225DE20FAEB4B000057B99 /* v002PacketCaptureHelperTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B225DD20FAEB45300057B99 /* v002PacketCaptureHelperTool.m */; };
 		1B225E020FAEB59200057B99 /* v002PacketCaptureHelperTool in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B225DDD0FAEB47400057B99 /* v002PacketCaptureHelperTool */; };
-		1B225E340FAEBC1100057B99 /* SecurityFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B225E330FAEBC1100057B99 /* SecurityFoundation.framework */; };
-		1B225E380FAEBC2300057B99 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B225E370FAEBC2300057B99 /* Security.framework */; };
 		1B2261CC0FB2A6FC00057B99 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B2261CB0FB2A6FC00057B99 /* SystemConfiguration.framework */; };
+		1B2F51CB1780E06D005F399A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B2F51C71780E05C005F399A /* Security.framework */; };
+		1B2F51CC1780E06D005F399A /* SecurityFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B2F51C81780E05C005F399A /* SecurityFoundation.framework */; };
+		1B2F51CD1780E06D005F399A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B2261CB0FB2A6FC00057B99 /* SystemConfiguration.framework */; };
+		1B2F51CE1780E06D005F399A /* SecurityFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B8552B70E0C5A200022651C /* SecurityFoundation.framework */; };
+		1B2F51CF1780E06D005F399A /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16BA96300A7EB9AC001E4983 /* Quartz.framework */; };
+		1B2F51D01780E06D005F399A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
+		1B2F51D41780E83E005F399A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B2F51C71780E05C005F399A /* Security.framework */; };
 		1B8552B80E0C5A200022651C /* SecurityFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B8552B70E0C5A200022651C /* SecurityFoundation.framework */; };
-		1B8552BF0E0C5A970022651C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B8552BE0E0C5A970022651C /* Security.framework */; };
 		1B9404050FB3990400336116 /* DistributedPacket.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B9403CD0FB3973F00336116 /* DistributedPacket.m */; };
 		1B94040A0FB3990B00336116 /* DistributedPacket.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B9403CD0FB3973F00336116 /* DistributedPacket.m */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
@@ -43,13 +32,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 1B225DDC0FAEB47400057B99;
 			remoteInfo = v002PacketCaptureHelperTool;
-		};
-		233E2C650A83C76D005A62DF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
-			remoteInfo = v002PacketCapture;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -74,12 +56,11 @@
 		16BA96300A7EB9AC001E4983 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		1B225DD20FAEB45300057B99 /* v002PacketCaptureHelperTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = v002PacketCaptureHelperTool.m; sourceTree = "<group>"; };
 		1B225DDD0FAEB47400057B99 /* v002PacketCaptureHelperTool */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = v002PacketCaptureHelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
-		1B225E330FAEBC1100057B99 /* SecurityFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityFoundation.framework; path = System/Library/Frameworks/SecurityFoundation.framework; sourceTree = SDKROOT; };
-		1B225E370FAEBC2300057B99 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		1B225EA60FB0A39100057B99 /* v002PacketCaptureProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = v002PacketCaptureProtocol.h; sourceTree = "<group>"; };
 		1B2261CB0FB2A6FC00057B99 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
+		1B2F51C71780E05C005F399A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		1B2F51C81780E05C005F399A /* SecurityFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/SecurityFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		1B8552B70E0C5A200022651C /* SecurityFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityFoundation.framework; path = /System/Library/Frameworks/SecurityFoundation.framework; sourceTree = "<absolute>"; };
-		1B8552BE0E0C5A970022651C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		1B9402CB0FB3774D00336116 /* v002PacketCaptureHelperTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = v002PacketCaptureHelperTool.h; sourceTree = "<group>"; };
 		1B9402F10FB37C0000336116 /* HelperFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperFunctions.h; sourceTree = "<group>"; };
 		1B9403CC0FB3973F00336116 /* DistributedPacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DistributedPacket.h; sourceTree = "<group>"; };
@@ -93,8 +74,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B225E340FAEBC1100057B99 /* SecurityFoundation.framework in Frameworks */,
-				1B225E380FAEBC2300057B99 /* Security.framework in Frameworks */,
+				1B2F51CB1780E06D005F399A /* Security.framework in Frameworks */,
+				1B2F51CC1780E06D005F399A /* SecurityFoundation.framework in Frameworks */,
+				1B2F51CD1780E06D005F399A /* SystemConfiguration.framework in Frameworks */,
+				1B2F51CE1780E06D005F399A /* SecurityFoundation.framework in Frameworks */,
+				1B2F51CF1780E06D005F399A /* Quartz.framework in Frameworks */,
+				1B2F51D01780E06D005F399A /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,10 +87,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B2F51D41780E83E005F399A /* Security.framework in Frameworks */,
 				8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */,
 				16BA96310A7EB9AC001E4983 /* Quartz.framework in Frameworks */,
 				1B8552B80E0C5A200022651C /* SecurityFoundation.framework in Frameworks */,
-				1B8552BF0E0C5A970022651C /* Security.framework in Frameworks */,
 				1B2261CC0FB2A6FC00057B99 /* SystemConfiguration.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -121,8 +106,6 @@
 				089C167CFE841241C02AAC07 /* Resources */,
 				089C1671FE841209C02AAC07 /* Frameworks */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
-				1B225E330FAEBC1100057B99 /* SecurityFoundation.framework */,
-				1B225E370FAEBC2300057B99 /* Security.framework */,
 			);
 			name = "Quartz Composer Plug In";
 			sourceTree = "<group>";
@@ -130,8 +113,9 @@
 		089C1671FE841209C02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1B2F51C71780E05C005F399A /* Security.framework */,
+				1B2F51C81780E05C005F399A /* SecurityFoundation.framework */,
 				1B2261CB0FB2A6FC00057B99 /* SystemConfiguration.framework */,
-				1B8552BE0E0C5A970022651C /* Security.framework */,
 				1B8552B70E0C5A200022651C /* SecurityFoundation.framework */,
 				16BA96300A7EB9AC001E4983 /* Quartz.framework */,
 				1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */,
@@ -221,6 +205,7 @@
 				8D5B49B1048680CD000E48DA /* Sources */,
 				8D5B49B3048680CD000E48DA /* Frameworks */,
 				1B225E030FAEB5B000057B99 /* CopyFiles */,
+				1B2F51D11780E1BA005F399A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -238,22 +223,28 @@
 /* Begin PBXProject section */
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+			};
 			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "v002PacketCapture" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 089C166AFE841209C02AAC07 /* Quartz Composer Plug In */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				1B225DDC0FAEB47400057B99 /* v002PacketCaptureHelperTool */,
 				8D5B49AC048680CD000E48DA /* v002PacketCapture */,
-				233E2C640A83C768005A62DF /* Build & Copy */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		233E2C690A83C783005A62DF /* ShellScript */ = {
+		1B2F51D11780E1BA005F399A /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -295,11 +286,6 @@
 			target = 1B225DDC0FAEB47400057B99 /* v002PacketCaptureHelperTool */;
 			targetProxy = 1B225DF30FAEB53700057B99 /* PBXContainerItemProxy */;
 		};
-		233E2C660A83C76D005A62DF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8D5B49AC048680CD000E48DA /* v002PacketCapture */;
-			targetProxy = 233E2C650A83C76D005A62DF /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -309,7 +295,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -323,8 +308,8 @@
 					"-l",
 					pcap,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = v002PacketCaptureHelperTool;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -334,7 +319,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
@@ -345,8 +329,8 @@
 					"-framework",
 					AppKit,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = v002PacketCaptureHelperTool;
+				SDKROOT = macosx;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -354,9 +338,9 @@
 		1DEB913B08733D840010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -365,6 +349,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Graphics/Quartz Composer Plug-Ins";
 				PRODUCT_NAME = v002PacketCapture;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = plugin;
 				ZERO_LINK = YES;
 			};
@@ -373,6 +358,7 @@
 		1DEB913C08733D840010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_MODEL_TUNING = G5;
@@ -381,6 +367,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Graphics/Quartz Composer Plug-Ins";
 				PRODUCT_NAME = v002PacketCapture;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Release;
@@ -397,7 +384,7 @@
 					"-l",
 					pcap,
 				);
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -409,22 +396,8 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
-			};
-			name = Release;
-		};
-		233E2D8A0A83C7AC005A62DF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Build & Install";
-			};
-			name = Debug;
-		};
-		233E2D8B0A83C7AC005A62DF /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Build & Install";
 			};
 			name = Release;
 		};
@@ -454,15 +427,6 @@
 			buildConfigurations = (
 				1DEB913F08733D840010E9CD /* Debug */,
 				1DEB914008733D840010E9CD /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		233E2D890A83C7AC005A62DF /* Build configuration list for PBXAggregateTarget "Build & Copy" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				233E2D8A0A83C7AC005A62DF /* Debug */,
-				233E2D8B0A83C7AC005A62DF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

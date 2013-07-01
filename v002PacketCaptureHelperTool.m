@@ -1,35 +1,65 @@
 
 #import "v002PacketCaptureHelperTool.h"
 
+
+
+// for libpcap
+// see http://www.tcpdump.org/pcap.htm
+// and http://yuba.stanford.edu/~casado/pcap/section1.html
+
+#import <stdio.h>
+#import <stdlib.h>
+#import <pcap.h>
+#import <errno.h>
+#import <sys/socket.h>
+#import <netinet/in.h>
+#import <arpa/inet.h>
+#import <netinet/if_ether.h>
+
+#import "DistributedPacket.h"
+#import "HelperFunctions.h"
+#import "v002PacketCaptureProtocol.h"
+
+@interface AppController ()
+{
+	pcap_t* descr;
+}
+
+@property (atomic, readwrite, retain) NSConnection* connection;
+
+@property (atomic, readwrite, copy) NSString* device;
+@property (atomic, readwrite, retain) DistributedPacket* dPacket;
+
+- (void) pcapLoopThread;
+
+@end
+
 @implementation AppController
 
 static DistributedPacket *sharedDistributedPacket;
-
-+ (id)sharedDistributedPacket
-{
-	if (!sharedDistributedPacket)
-		sharedDistributedPacket = [[DistributedPacket alloc] init];
-	
-	return sharedDistributedPacket;
-}
 
 - (void) applicationDidFinishLaunching:(NSNotification *)aNotification
 {
 	NSLog(@"Helper Tool Finished Launching");
 	
-	dPacket = [AppController  sharedDistributedPacket];
+	self.dPacket = [[DistributedPacket alloc] init];
 
+	sharedDistributedPacket = self.dPacket;
+	
 	// publish our distributed object
-	NSConnection* connection = [NSConnection defaultConnection];
-	[connection setRootObject:dPacket];
-	if ([connection registerName:@"info.vade.packetCaptureHelperTool"] == NO) 
+//	NSConnection* connection = [NSConnection serviceConnectionWithName:@"info.vade.packetCaptureHelperTool" rootObject:self.dPacket];
+
+	self.connection = [NSConnection new];
+	[self.connection setRootObject:self.dPacket];
+	
+	if ([self.connection registerName:@"info.vade.packetCaptureHelperTool"] == NO) 
 	{
 		NSLog(@"Error opening NSConnection - exiting");
 	}
 	else
 		NSLog(@"NSConnection Open");	
 	
-	char dev[] = "en1"; // name of the device to use
+	char dev[] = "en0"; // name of the device to use
 	
 	char errbuf[PCAP_ERRBUF_SIZE];
 	
@@ -47,7 +77,7 @@ static DistributedPacket *sharedDistributedPacket;
 	}
 
 	// open our device
-	descr = pcap_open_live(dev,BUFSIZ,1,0,errbuf);
+	descr = pcap_open_live(dev, 65535 /*BUFSIZ*/,1,0,errbuf);
 	if(descr == NULL)
     {
         NSLog(@"pcap_open_live(): %s",errbuf);
@@ -64,15 +94,14 @@ void v002_PacketHandlerCallback(u_char *useless, const struct pcap_pkthdr* pkthd
 	
 	if(packet == NULL)
     {
-		
 		// dinna work *sob*
         NSLog(@"Didn't grab packet");
+		return;
 	}
-	
+		
 	NSMutableDictionary* packetDictionary = nil;
 	
 	packetDictionary = helperHandleEthernet(useless, pkthdr, packet);
-	
 	
 	/*
 	// lets start with the ether header...
@@ -94,20 +123,29 @@ void v002_PacketHandlerCallback(u_char *useless, const struct pcap_pkthdr* pkthd
 		NSLog(@"Ethernet type %x not IP", ntohs(eptr->ether_type));
     }
 	*/
-	
-	@synchronized(sharedDistributedPacket)
+
+	if(packetDictionary)
 	{
-		[sharedDistributedPacket addPacket:packetDictionary];
+		[packetDictionary retain];
+		dispatch_async(dispatch_get_main_queue(), ^
+		{
+			[sharedDistributedPacket addPacket:packetDictionary];
+			[packetDictionary release];
+		});
+		
+		[packetDictionary release];
 	}
+
 }
 
 - (void) pcapLoopThread
 {
 	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	
+	
 //	[NSThread setThreadPriority:1.0];
 	
-	pcap_loop(descr, 0, v002_PacketHandlerCallback,NULL);
+	pcap_loop(descr, -1, v002_PacketHandlerCallback, NULL);
 	
 	pcap_close(descr);
 	
@@ -116,7 +154,7 @@ void v002_PacketHandlerCallback(u_char *useless, const struct pcap_pkthdr* pkthd
 
 - (void) debugRootObject
 {
-	[[dPacket mutablePacketArray] addObject:@"This is a test"];
+//	[[self.dPacket mutablePacketArray] addObject:@"This is a test"];
 }
 
 - (void) debug

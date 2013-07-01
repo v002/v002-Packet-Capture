@@ -11,31 +11,7 @@
 #import <SecurityFoundation/SFAuthorization.h>
 #import <Cocoa/Cocoa.h>
 
-// for libpcap
-// see http://www.tcpdump.org/pcap.htm
-// and http://yuba.stanford.edu/~casado/pcap/section1.html
 
-#import <stdio.h>
-#import <stdlib.h>
-#import <pcap.h>  
-#import <errno.h>
-#import <sys/socket.h>
-#import <netinet/in.h>
-#import <arpa/inet.h>
-#import <netinet/if_ether.h>
-
-#import "DistributedPacket.h"
-#import "HelperFunctions.h"
-#import "v002PacketCaptureProtocol.h"
-
-@interface AppController : NSObject
-{
-	pcap_t* descr;
-	
-	DistributedPacket* dPacket;
-	NSString* device;
-}
-+ (id)sharedDistributedPacket;
-- (void) pcapLoopThread;
+@interface AppController : NSObject <NSApplicationDelegate>
 
 @end
