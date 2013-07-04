@@ -38,6 +38,7 @@
 @interface v002PacketCapturePlugIn ()
 
 @property (atomic, readwrite, retain) id proxyObjectFromHelper;				// our packet info from helper tool
+@property (atomic, readwrite, retain) SFAuthorization* authorization;
 @property (atomic, readwrite, assign) AuthorizationRef myAuthorizationRef;	//	for authorizing packet capturing.
 @property (atomic, readwrite, assign) AuthorizationItem* authItems;			//	requested rights. need admin/root for raw socket/promiscuous mode. sounds sexy right?
 
@@ -110,11 +111,13 @@
 
 - (void) finalize
 {
+	[self.authorization invalidateCredentials];
 	[super finalize];
 }
 
 - (void) dealloc
 {
+	[self.authorization invalidateCredentials];
 	[super dealloc];
 }
 
@@ -131,7 +134,7 @@
 //	strcmp(path, [pathToHelperTool lossyCString]);
 	
 	// this needs to be looked at
- 	OSStatus myStatus = AuthorizationExecuteWithPrivileges (self.myAuthorizationRef,"/Users/vade/Library/Graphics/Quartz Composer Plug-Ins/v002PacketCapture.plugin/Contents/Resources/v002PacketCaptureHelperTool", kAuthorizationFlagDefaults, myArguments, &myCommunicationsPipe);
+ 	OSStatus myStatus = AuthorizationExecuteWithPrivileges(self.authorization.authorizationRef, [pathToHelperTool cStringUsingEncoding:NSASCIIStringEncoding], kAuthorizationFlagDefaults, myArguments, &myCommunicationsPipe);
 	if (myStatus == errAuthorizationSuccess)	
 	{
 		NSLog(@"Launched helper tool - connecting to Shared Port for IPC");
@@ -156,15 +159,15 @@
 	//																 rights:NULL
 	//															environment:kAuthorizationEmptyEnvironment];
 	
-	SFAuthorization *auth = [SFAuthorization authorization];
+	self.authorization = [SFAuthorization authorization];
 	
-	if(![auth obtainWithRight:"info.v002.v002PacketCapture.init"
-						flags:kAuthorizationFlagDefaults|kAuthorizationFlagExtendRights//|kAuthorizationFlagInteractionAllowed//|kAuthorizationFlagPreAuthorize
+	if(![self.authorization obtainWithRight:"info.v002.v002PacketCapture.init"
+						flags:kAuthorizationFlagExtendRights
+		 //kAuthorizationFlagExtendRights | //kAuthorizationFlagInteractionAllowed// | kAuthorizationFlagPreAuthorize
 						error:&error])
 	{
-		self.myAuthorizationRef = [auth authorizationRef];                        // 3
 		AuthorizationExternalForm authExtForm;
-		OSStatus status = AuthorizationMakeExternalForm(self.myAuthorizationRef, &authExtForm);    // 4
+		OSStatus status = AuthorizationMakeExternalForm(self.authorization.authorizationRef, &authExtForm);    // 4
 		if (errAuthorizationSuccess == status)
 		{
 			NSLog(@"SUCESS - we authorized some shit to do..");
@@ -182,7 +185,7 @@
 		
 	return YES;
 }
-
+ 
 - (void) enableExecution:(id<QCPlugInContext>)context
 {	
 			
@@ -215,6 +218,7 @@
 - (void) stopExecution:(id<QCPlugInContext>)context
 {
 	[self.proxyObjectFromHelper quitHelperTool];
+	[self.authorization invalidateCredentials];
 }
 
 @end

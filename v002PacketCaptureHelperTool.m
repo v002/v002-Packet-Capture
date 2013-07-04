@@ -47,8 +47,6 @@ static DistributedPacket *sharedDistributedPacket;
 	sharedDistributedPacket = self.dPacket;
 	
 	// publish our distributed object
-//	NSConnection* connection = [NSConnection serviceConnectionWithName:@"info.vade.packetCaptureHelperTool" rootObject:self.dPacket];
-
 	self.connection = [NSConnection new];
 	[self.connection setRootObject:self.dPacket];
 	
@@ -135,15 +133,11 @@ void v002_PacketHandlerCallback(u_char *useless, const struct pcap_pkthdr* pkthd
 		
 		[packetDictionary release];
 	}
-
 }
 
 - (void) pcapLoopThread
 {
 	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	
-	
-//	[NSThread setThreadPriority:1.0];
 	
 	pcap_loop(descr, -1, v002_PacketHandlerCallback, NULL);
 	
@@ -173,6 +167,8 @@ void v002_PacketHandlerCallback(u_char *useless, const struct pcap_pkthdr* pkthd
 // main run loop.
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	
+	NSLog(@"Attempting to launch!");
 	
 	NSApplication *app = [NSApplication sharedApplication];
 	

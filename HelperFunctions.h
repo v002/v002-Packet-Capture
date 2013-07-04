@@ -20,33 +20,15 @@
 #import <errno.h>
 #import <sys/socket.h>
 #import <netinet/in.h>
+#import <netinet/ip.h>
+#import <netinet/ip6.h>
 #import <arpa/inet.h>
 #import <netinet/if_ether.h>
 #import <sys/time.h>
 #include <sys/_structs.h>
 
-
-struct my_ip 
-{
-	u_int8_t	ip_vhl;		/* header length, version */
-	#define IP_V(ip)	(((ip)->ip_vhl & 0xf0) >> 4)
-	#define IP_HL(ip)	((ip)->ip_vhl & 0x0f)
-	u_int8_t	ip_tos;		/* type of service */
-	u_int16_t	ip_len;		/* total length */
-	u_int16_t	ip_id;		/* identification */
-	u_int16_t	ip_off;		/* fragment offset field */
-	#define	IP_DF 0x4000			/* dont fragment flag */
-	#define	IP_MF 0x2000			/* more fragments flag */
-	#define	IP_OFFMASK 0x1fff		/* mask for fragmenting bits */
-	u_int8_t	ip_ttl;		/* time to live */
-	u_int8_t	ip_p;		/* protocol */
-	u_int16_t	ip_sum;		/* checksum */
-	struct	in_addr ip_src,ip_dst;	/* source and dest address */
-};
-
 NSMutableDictionary* helperHandleIP (u_char *args,const struct pcap_pkthdr* pkthdr, const u_char* packet);
 NSMutableDictionary* helperHandleEthernet(u_char *args,const struct pcap_pkthdr* pkthdr,const u_char* packet);
-
 
 NSMutableDictionary* helperHandleEthernet(u_char *args,const struct pcap_pkthdr* pkthdr,const u_char* packet)
 {	
@@ -58,7 +40,7 @@ NSMutableDictionary* helperHandleEthernet(u_char *args,const struct pcap_pkthdr*
 	switch (ntohs(eptr->ether_type)) 
 	{
 		case ETHERTYPE_IP:
-//			NSLog(@"Found IP Packet");
+//		case ETHERTYPE_IPV6:
 			return helperHandleIP(args, pkthdr, packet);
 			break;
 		case ETHERTYPE_ARP:
@@ -81,18 +63,16 @@ NSMutableDictionary* helperHandleIP (u_char *args,const struct pcap_pkthdr* pkth
 		NSMutableDictionary * packetInfoDictionary = [NSMutableDictionary new];
 	
 		int len;	
-		const struct my_ip* ip;
-		u_int length = pkthdr ->len; // - &len;
+		const struct ip* ip;
+		u_int length = pkthdr ->len;
 		u_int hlen,off,version;
-	  
-		//int i;
-		
+	  		
 		// jump pass the ethernet header
-		ip = (struct my_ip*)(packet + sizeof(struct ether_header));
+		ip = (struct ip*)(packet + sizeof(struct ether_header));
 		length -= sizeof(struct ether_header); 
 		
 		// check to see we have a packet of valid length
-		if (length < sizeof(struct my_ip))
+		if (length < sizeof(struct ip))
 		{
 			[packetInfoDictionary release];
 			printf("truncated ip %d",length);
@@ -100,8 +80,8 @@ NSMutableDictionary* helperHandleIP (u_char *args,const struct pcap_pkthdr* pkth
 		}
 		
 		len     = ntohs(ip->ip_len);
-		hlen    = IP_HL(ip);	// header length 
-		version = IP_V(ip);		// ip version
+		hlen    = ip->ip_hl; // IP_HL(ip);	// header length
+		version = ip->ip_v;  //IP_V(ip);		// ip version
 		
 		// check version
 		if(version != 4)
@@ -145,7 +125,7 @@ NSMutableDictionary* helperHandleIP (u_char *args,const struct pcap_pkthdr* pkth
 
 			[packetInfoDictionary setValue:source forKey:@"Source" ];
 			[packetInfoDictionary setValue:destination forKey:@"Destination"];
-			[packetInfoDictionary setValue:@"IP" forKey:@"Protocol"];
+			[packetInfoDictionary setValue:@"IPv4" forKey:@"Protocol"];
 			[packetInfoDictionary setValue:dataString forKey:@"Data"];
 
 			[dataString release];

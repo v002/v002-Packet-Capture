@@ -304,7 +304,7 @@
 					"-framework",
 					Foundation,
 					"-framework",
-					Appkit,
+					AppKit,
 					"-l",
 					pcap,
 				);
@@ -328,6 +328,8 @@
 					Foundation,
 					"-framework",
 					AppKit,
+					"-l",
+					pcap,
 				);
 				PRODUCT_NAME = v002PacketCaptureHelperTool;
 				SDKROOT = macosx;
@@ -349,7 +351,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Graphics/Quartz Composer Plug-Ins";
 				PRODUCT_NAME = v002PacketCapture;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.7;
 				WRAPPER_EXTENSION = plugin;
 				ZERO_LINK = YES;
 			};
@@ -367,7 +369,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Graphics/Quartz Composer Plug-Ins";
 				PRODUCT_NAME = v002PacketCapture;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.7;
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Release;
