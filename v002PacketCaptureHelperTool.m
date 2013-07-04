@@ -75,7 +75,7 @@ static DistributedPacket *sharedDistributedPacket;
 	}
 
 	// open our device
-	descr = pcap_open_live(dev, 65535 /*BUFSIZ*/,1,0,errbuf);
+	descr = pcap_open_live(dev, BUFSIZ/*65535*/ /*BUFSIZ*/,1,0,errbuf);
 	if(descr == NULL)
     {
         NSLog(@"pcap_open_live(): %s",errbuf);
@@ -137,18 +137,12 @@ void v002_PacketHandlerCallback(u_char *useless, const struct pcap_pkthdr* pkthd
 
 - (void) pcapLoopThread
 {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	
-	pcap_loop(descr, -1, v002_PacketHandlerCallback, NULL);
-	
-	pcap_close(descr);
-	
-	[pool release];
-}
-
-- (void) debugRootObject
-{
-//	[[self.dPacket mutablePacketArray] addObject:@"This is a test"];
+	@autoreleasepool
+	{
+		pcap_loop(descr, -1, v002_PacketHandlerCallback, NULL);
+		
+		pcap_close(descr);
+	}
 }
 
 - (void) debug
@@ -165,79 +159,18 @@ void v002_PacketHandlerCallback(u_char *useless, const struct pcap_pkthdr* pkthd
 @end
 
 // main run loop.
-int main (int argc, const char * argv[]) {
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	
-	NSLog(@"Attempting to launch!");
-	
-	NSApplication *app = [NSApplication sharedApplication];
-	
-	AppController *myAppController = [[AppController alloc] init];
-	[app setDelegate:myAppController];
-	
-	[app run];	
-	
-    [pool release];
-	[app release];
-	
+int main (int argc, const char * argv[])
+{
+	@autoreleasepool
+	{
+		NSApplication *app = [NSApplication sharedApplication];
+		
+		AppController *myAppController = [[AppController alloc] init];
+
+		[app setDelegate:myAppController];
+		[app run];
+		[app release];
+	}
 	return 0;
 }
 
-/*	
-	// test some pcap functions here.
-	char dev[] = "en1"; // name of the device to use
-	
-	char errbuf[PCAP_ERRBUF_SIZE];
-	
-	bpf_u_int32 netp;	// ip
-	bpf_u_int32 maskp;	// subnet mask
-	char* net;
-	char* mask;
-	struct in_addr addr;
-	
-	if (pcap_lookupnet(dev, &netp, &maskp, errbuf) == -1)
-	{
-		NSLog(@"Can't get netmask for device %s", dev);
-	//	return NO;
-	}
-	
-	// get the network address in a human readable form 
-	addr.s_addr = netp;
-	net = inet_ntoa(addr);
-	NSLog(@"Discovered IP is: %s", net);
-	
-	addr.s_addr = maskp;
-	mask = inet_ntoa(addr);
-	
-	NSLog(@"Discovered Netmask is: %s", mask);
-	
-	
-	// try some capturing...
-	pcap_t* descr;
-		
-	descr = pcap_open_live(dev,BUFSIZ,1,0,errbuf);
-	if(descr == NULL)
-    {
-        NSLog(@"pcap_open_live(): %s",errbuf);
-		return 0;
-    }
-	
-	// loop to our callback
-	pcap_loop(descr, 1000, v002_PacketHandlerCallback,NULL);
-	
-	*/
-
-// get the network address in a human readable form 
-/*	addr.s_addr = netp;
- net = inet_ntoa(addr);
- NSLog(@"Discovered IP is: %s", net);
- 
- NSString* hostString = [NSString stringWithCString:net];
- 
- addr.s_addr = maskp;
- mask = inet_ntoa(addr);
- 
- NSLog(@"Discovered Netmask is: %s", mask);
- NSString* maskString = [NSString stringWithCString:mask];
- 
- */
